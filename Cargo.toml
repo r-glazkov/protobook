@@ -1,0 +1,28 @@
+[package]
+name = "protobook"
+version = "0.0.0"
+authors = ["Руслан Глазков <ruslan.glazkov@proton.me>"]
+description = "Book format optimized for small screens, an alternaive for the XML-based FB2"
+readme = "README.md"
+homepage = "https://github.com/r-glazkov/protobook"
+repository = "https://github.com/r-glazkov/protobook"
+keywords = ["book", "book-format", "protobuf", "protocol-buffers", "fb2"]
+categories = ["parser-implementations"]
+license = "MIT"
+edition = "2021"
+
+[dependencies]
+fb2 = { version = "0.4", optional = true }
+language-tags = { version = "0.3", optional = true }
+prost = "0.13"
+uuid = { version = "1", features = ["v4"], optional = true }
+
+[build-dependencies]
+prost-build = "0.13"
+
+[features]
+fb2 = ["dep:fb2", "dep:language-tags", "dep:uuid"]
+
+[dev-dependencies]
+quick-xml = { version = "0.36", features = ["serialize"] }
+uuid = { version = "1", features = ["v4"] }

@@ -1,0 +1,339 @@
+syntax = "proto3";
+
+package protobook;
+
+option go_package = ".;protobook";
+
+message Book {
+  // Неповторимый идентификатор книги
+  string id = 1;
+  // Краткое название книги, используемое вне читалки, например, в списке книг читателя
+  string short_title = 2;
+  // Дата, когда книга была написана или впервые опубликована (оригинальное, не переведённое и не переизданное произведение)
+  Date date = 3;
+  // Оригинальные авторы произведения (не переводчики и не издатели)
+  repeated Author authors = 4;
+  // Главы произведения
+  repeated Chapter chapters = 5;
+  // Идентификатор языка согласно RFC 5646, на котором написана эта книга или на который была переведена
+  string language = 6;
+  // Изображение книги, предпочтительно 6:9, используемое, например, в списке книг читателя, на странице описания произведения, или отображаемое перед чтением
+  InlineImage cover = 7;
+  // Заголовок произведения, который отобразиться при чтении произведения
+  Title title = 8;
+  // Краткое изложение произведения, его описание
+  Annotation annotation = 9;
+  // Фрагмент текста, предшествующий основному содержанию книги. В том числе, предшествующий главам книги.
+  repeated Epigraph epigraphs = 10;
+  // Примечания
+  Footnotes notes = 11;
+  // Комментарии
+  Footnotes comments = 12;
+}
+
+// Дата в различных форматах
+message Date {
+  // ISO 8601 дата, понимаемая программами
+  string iso_date = 1;
+  // Дата в любом виде, которую предпочтительнее отобразить читателю
+  string display_date = 2;
+}
+
+// Причастный к созданию оригинального произведения человек (не переводчик и не издатель)
+message Author {
+  // Идентификатор, по которому можно лучше познакомиться с автором и, возможно, с другими его произведениями
+  string id = 1;
+  // Предпочтительное, возможно вымышленное, полное имя автора
+  string full_name = 2;
+  // Данное, обычно родителями, имя автору
+  string given_name = 3;
+  // Наследственное родовое имя автора
+  string family_name = 4;
+  // Дополнительное имя. Обычно, отчество
+  string middle_name = 5;
+}
+
+// Глава книги
+message Chapter {
+  // Неповторимый идентификатор главы, на который можно ссылаться
+  string anchor = 1;
+  // Заголовок главы книги
+  Title title = 2;
+  // Краткое изложение или описание главы книги, предшествующее основному повествованию
+  Annotation annotation = 3;
+  // Изображение, описывающее главу, отображаемое перед основным повествованием
+  Image cover = 4;
+  // Фрагменты текста, помещённые перед началом главы, после её названия
+  repeated Epigraph epigraphs = 5;
+  // Содержание главы из нескольких частей, отличные по структуре или отображению
+  repeated Content content = 6;
+  // Подразделы главы
+  repeated Chapter sub_chapters = 7;
+}
+
+// Заголовок чего-либо
+message Title {
+  // Содержание заголовка из нескольких частиц
+  repeated TitleElement content = 1;
+}
+
+// Допустимая частица заголовка
+message TitleElement {
+  oneof title_element {
+    EmptyLine empty_line = 1;
+    Paragraph paragraph = 2;
+  }
+}
+
+// Краткое изложение или описание книги или главы
+message Annotation {
+  // Неповторимый идентификатор аннотации, на который можно ссылаться
+  string anchor = 1;
+  // Содержание аннотации
+  repeated AnnotationElement content = 2;
+}
+
+// Допустимая частица аннотации
+message AnnotationElement {
+  oneof annotation_element {
+    EmptyLine empty_line = 1;
+    Paragraph paragraph = 2;
+    Poem poem = 3;
+    Cite cite = 4;
+    Paragraph subtitle = 5;
+    Table table = 6;
+  }
+}
+
+// Фрагмент текста, помещённый перед началом произведения или его части (после названия) и отделённый от основного текста графически и структурно
+message Epigraph {
+  // Неповторимый идентификатор эпиграфа, на который можно ссылаться
+  string anchor = 1;
+  // Автор эпиграфа
+  repeated Paragraph authors = 2;
+  // Содержание эпиграфа в нескольких частях отличных по структуре или отображению
+  repeated EpigraphElement content = 3;
+}
+
+// Допустимые частицы эпиграфа
+message EpigraphElement {
+  oneof epigraph_element {
+    EmptyLine empty_line = 1;
+    Paragraph paragraph = 2;
+    Poem poem = 3;
+    Cite cite = 4;
+  }
+}
+
+// Сноски
+message Footnotes {
+  // Заголовок части книги со сносками, обычно имеющий простые значения вроде "Примечания" или "Комментарии"
+  Title title = 1;
+  // Сноски по неповторимому строковому идентификатору
+  map<string, Footnote> content = 2;
+}
+
+// Сноска
+message Footnote {
+  // Золовок сноски, обычно содержащий её порядковый номер
+  Title title = 1;
+  // Содержание сноски из несколько частиц
+  repeated Content content = 2;
+}
+
+// Изображение, которое может озаглавливать главу или отдельную её часть, не может находиться внутри текста
+message Image {
+  // Неповторимый идентификатор изображения
+  string id = 1;
+  // Неповторимый идентификатор изображения, на который можно ссылаться
+  string anchor = 2;
+  // Описание изображения, которое покажется в случае невозможности отображения самого изображения
+  string alt = 3;
+  // Краткое описание изображения, которая будет отображено рядом с ним самим
+  string title = 4;
+}
+
+// Описание изображения, которое покажется в случае невозможности отображения самого изображения
+message InlineImage {
+  // Неповторимый идентификатор изображения
+  string id = 1;
+  // Описание изображения, которое покажется в случае невозможности отображения самого изображения
+  string alt = 2;
+}
+
+// Допустимое содержание верхнего уровня главы, примечаний, комментариев...
+message Content {
+  oneof content {
+    EmptyLine empty_line = 1;
+    Paragraph paragraph = 2;
+    Poem poem = 3;
+    Paragraph subtitle = 4;
+    Cite cite = 5;
+    Table table = 6;
+    Image image = 7;
+  }
+}
+
+// Пустая строка
+message EmptyLine {}
+
+// Параграф
+message Paragraph {
+  // Неповторимый идентификатор параграфа, на который можно ссылаться
+  string anchor = 1;
+  // Содержание абзаца
+  repeated Span content = 2;
+}
+
+// Произведение в стихотворной форме
+message Poem {
+  // Неповторимый идентификатор поэмы, на который можно ссылаться
+  string anchor = 1;
+  // Заголовок произведения
+  Title title = 2;
+  // Фрагменты текста, помещённые перед началом произведения, после его названия
+  repeated Epigraph epigraphs = 3;
+  // Список создателей стихотворного произведения
+  repeated Paragraph authors = 4;
+  // Содержание произведения из нескольких частей
+  repeated PoemElement content = 5;
+}
+
+// Допустимая частица стихотворного произведения
+message PoemElement {
+  oneof poem_element {
+    Paragraph subtitle = 1;
+    Stanza stanza = 2;
+  }
+}
+
+// Строфа
+message Stanza {
+  // Заголовок строфы
+  Title title = 1;
+  // Подзаголовок строфы
+  Paragraph subtitle = 2;
+  // Стихи
+  repeated Paragraph content = 3;
+}
+
+// Цитата
+message Cite {
+  // Неповторимый идентификатор цитаты, на который можно ссылаться
+  string anchor = 1;
+  // Авторы цитаты
+  repeated Paragraph authors = 2;
+  // Составные части цитаты
+  repeated CiteElement content = 3;
+}
+
+// Допустимая частица цитаты
+message CiteElement {
+  oneof cite_element {
+    EmptyLine empty_line = 1;
+    Paragraph paragraph = 2;
+    Poem poem = 3;
+    Paragraph subtitle = 4;
+    Table table = 5;
+  }
+}
+
+// Таблица
+message Table {
+  // Неповторимый идентификатор таблицы, на который можно ссылаться
+  string anchor = 1;
+  // Нужно ли отображать первый столбец как заглавный
+  bool header_column = 2;
+  // Нужно ли отобразить первый строку таблицы как заглавную
+  bool header_row = 3;
+  // Ряды таблицы
+  repeated TableRow rows = 4;
+}
+
+// Ряд таблицы
+message TableRow {
+  // Ячейка таблицы
+  repeated TableCell cells = 1;
+}
+
+// Ячейка таблицы
+message TableCell {
+  // Неповторимый идентификатор ячейки таблицы, на который можно ссылаться
+  string anchor = 1;
+  // Содерждание ячейки таблицы из нескольких частиц
+  repeated Span content = 2;
+}
+
+// Допустимая частица текста
+message Span {
+  oneof span {
+    FootnoteLink footnote = 1;
+    Link link = 2;
+    InlineImage image = 3;
+    Text text = 4;
+  }
+}
+
+// Ссылка на сноску в книге
+message FootnoteLink {
+  // Идентификатор сноски, на который этот элемент ссылается
+  string id = 1;
+  // Вид сноски, на которую этот элемент ссылается
+  FootnoteType type = 2;
+  // Содержание сноски из нескольких частиц
+  repeated Text content = 3;
+}
+
+// Вид сноски
+enum FootnoteType {
+  FOOTNOTE_TYPE_UNKNOWN = 0;
+  FOOTNOTE_TYPE_NOTE = 1;
+  FOOTNOTE_TYPE_COMMENT = 2;
+}
+
+// Ссылка на другую часть книги либо на внешний источник
+message Link {
+  // Ссылка на внешний источник либо на часть книги
+  oneof href {
+    // Ссылка на внешний источник
+    string remote = 1;
+    // Ссылка на определённую часть этой книги
+    string local = 2;
+  }
+  // Текст, к которому относится ссылка и который будет особым образом выделен
+  repeated Text content = 3;
+}
+
+// Часть текста с единообразным отображением
+message Text {
+  // Значение текста
+  string value = 1;
+  // Насыщенность шрифта
+  optional uint32 font_weight = 2;
+  // Оформление текста
+  optional FontStyle font_style = 3;
+  // Отобразить шрифта в виде нижнего или верхнего индекса
+  optional BaselineShift baseline_shift = 5;
+  // Украшения текста
+  repeated TextDecoration decorations = 4;
+}
+
+// Оформление текста, позволяющее отобразить текст определённым нетипичным образом
+enum FontStyle {
+  FONT_STYLE_UNKNOWN = 0;
+  FONT_STYLE_ITALIC = 1;
+  FONT_STYLE_CODE = 2;
+}
+
+// Позволяет отобразить шрифт в виде нижнего или верхнего индекса. Текст при этом располагается ниже или выше базовой линии остальных символов строки и уменьшенного размера
+enum BaselineShift {
+  BASELINE_SHIFT_UNKNOWN = 0;
+  BASELINE_SHIFT_SUBSCRIPT = 1;
+  BASELINE_SHIFT_SUPERSCRIPT = 2;
+}
+
+// Украшения текста
+enum TextDecoration {
+  TEXT_DECORATION_UNKNOWN = 0;
+  TEXT_DECORATION_LINE_THROUGH = 1;
+}
